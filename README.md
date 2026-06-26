@@ -1,5 +1,7 @@
 <div align="center">
 
+🌐 **简体中文** ｜ [English](./README.en.md)
+
 # 📚🔭 auto-paper-collecter
 
 ### *你的私人学术雷达 · Your Personal Research Radar*
