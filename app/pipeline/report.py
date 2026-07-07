@@ -4,7 +4,7 @@ import datetime as dt
 from collections import defaultdict
 
 from ..db import SessionLocal
-from ..models import Paper, UserSettings, WeeklyReport
+from ..models import Paper, SavedItem, UserSettings, WeeklyReport
 from ..services.ai import chat
 
 SECTION_SYS = (
@@ -56,9 +56,14 @@ async def build_weekly_report():
             sections.append({"name": kw, "count": len(group), "text": text})
 
         label, wk = _iso_week_label(dt.datetime.utcnow())
+        top_topic = max(by_topic, key=lambda k: len(by_topic[k])) if by_topic else ""
+        saved_count = db.query(SavedItem).filter(SavedItem.saved == True).count()
+        kw_list = [k for k in keywords if by_topic.get(k)]
+        summary = f"本周你关注的{len(kw_list)}个方向中，{top_topic}方向最活跃。以下是为你聚合的精选摘要。" if kw_list else "本周暂无新文献。添加关键词后开始追踪。"
         data = {
             "week_label": label, "week_no": wk,
             "total": len(papers), "sources": len({p.source for p in papers}),
+            "topTopic": top_topic, "saved": saved_count, "summary": summary,
             "picks": picks, "sections": sections,
         }
         rep = WeeklyReport(week_label=label, data=json.dumps(data, ensure_ascii=False))

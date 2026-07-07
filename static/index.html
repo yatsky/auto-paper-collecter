@@ -290,14 +290,14 @@
         <div style="background:linear-gradient(120deg,#2A5BD7,#3F6FE5);border-radius:20px;padding:30px 32px;color:#fff;margin-bottom:26px;position:relative;overflow:hidden">
           <div style="position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.08)"></div>
           <div style="position:relative">
-            <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8;margin-bottom:8px">每周回顾 · 第 25 周</div>
-            <h1 style="font-size:27px;font-weight:800;letter-spacing:-0.6px;margin-bottom:6px">2026 年 6 月 16 – 22 日 周报</h1>
-            <p style="font-size:14px;opacity:0.9;line-height:1.6;max-width:560px">本周你关注的三个方向整体活跃度上升，C2Rust 与漏洞修复延续高热度。以下是为你聚合的精选摘要。</p>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8;margin-bottom:8px">每周回顾 · 第 {{ report.week_no }} 周</div>
+            <h1 style="font-size:27px;font-weight:800;letter-spacing:-0.6px;margin-bottom:6px">{{ report.week_label }} 周报</h1>
+            <p style="font-size:14px;opacity:0.9;line-height:1.6;max-width:560px">{{ report.summary }}</p>
             <div style="display:flex;gap:30px;margin-top:22px">
-              <div><div style="font-size:26px;font-weight:800">142</div><div style="font-size:12px;opacity:0.85;font-weight:600">本周新文献</div></div>
-              <div><div style="font-size:26px;font-weight:800">5</div><div style="font-size:12px;opacity:0.85;font-weight:600">内容来源</div></div>
-              <div><div style="font-size:26px;font-weight:800">C2Rust</div><div style="font-size:12px;opacity:0.85;font-weight:600">最热方向</div></div>
-              <div><div style="font-size:26px;font-weight:800">9</div><div style="font-size:12px;opacity:0.85;font-weight:600">你已收藏</div></div>
+              <div><div style="font-size:26px;font-weight:800">{{ report.total }}</div><div style="font-size:12px;opacity:0.85;font-weight:600">本周新文献</div></div>
+              <div><div style="font-size:26px;font-weight:800">{{ report.sources }}</div><div style="font-size:12px;opacity:0.85;font-weight:600">内容来源</div></div>
+              <div><div style="font-size:26px;font-weight:800">{{ report.topTopic }}</div><div style="font-size:12px;opacity:0.85;font-weight:600">最热方向</div></div>
+              <div><div style="font-size:26px;font-weight:800">{{ report.saved }}</div><div style="font-size:12px;opacity:0.85;font-weight:600">你已收藏</div></div>
             </div>
           </div>
         </div>
