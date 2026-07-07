@@ -162,11 +162,16 @@ def bootstrap(db: Session = Depends(get_db)):
                 for n in ["arXiv", "Crossref", "Google Scholar", "GitHub",
                           "HuggingFace", "PapersWithCode", "学术新闻"]]
 
+    now = dt.datetime.now(_tz())
+    weekdays = ["一","二","三","四","五","六","日"]
+    today_date_str = f"{now.year}年{now.month}月{now.day}日 · 周{weekdays[now.weekday()]}"
+
     return {
         "configured": bool(keywords),
         "refreshing": is_refreshing(),
         "refreshStage": get_progress(),
         "feed": feed, "todayCount": today_count, "hasBackfill": has_backfill,
+        "todayDate": today_date_str,
         "backfillN": s.backfill_n,
         "library": library,
         "trendBars": trends.get("bars", []), "top3": trends.get("top3", []),
