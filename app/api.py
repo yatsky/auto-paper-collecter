@@ -171,7 +171,7 @@ def bootstrap(db: Session = Depends(get_db)):
         "refreshing": is_refreshing(),
         "refreshStage": get_progress(),
         "feed": feed, "todayCount": today_count, "hasBackfill": has_backfill,
-        "todayDate": today_date_str,
+        "todayDate": today_date_str, "keywordCount": len(keywords),
         "backfillN": s.backfill_n,
         "library": library,
         "trendBars": trends.get("bars", []), "top3": trends.get("top3", []),

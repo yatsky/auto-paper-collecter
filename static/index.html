@@ -144,7 +144,7 @@
           <h1 style="font-size:25px;font-weight:800;letter-spacing:-0.5px">今日文献流</h1>
           <span style="font-size:13px;color:#8A929E;font-weight:600">{{ todayDate }}</span>
         </div>
-        <p style="font-size:13.5px;color:#5B6470;margin-bottom:14px">为你的 3 个关键词找到 <b style="color:#2A5BD7">{{ todayCount }}</b> 篇今日新内容 · 来自 arXiv、Google Scholar、IEEE、ACM、学术新闻</p>
+        <p style="font-size:13.5px;color:#5B6470;margin-bottom:14px">为你的 {{ keywordCount }} 个关键词找到 <b style="color:#2A5BD7">{{ todayCount }}</b> 篇今日新内容 · 来自 arXiv、Google Scholar、IEEE、ACM、学术新闻</p>
 
         <sc-if value="{{ notConfigured }}" hint-placeholder-val="">
         <div style="background:#fff;border:1px dashed #C9D4EE;border-radius:16px;padding:34px 30px;text-align:center;margin-bottom:18px">
@@ -752,96 +752,7 @@ class Component extends DCLogic {
   }
 
   papers() {
-    const SRC = {
-      arxiv:   { source:'arXiv',          color:'#B31B1B', bg:'#FBEAEA' },
-      scholar: { source:'Google Scholar', color:'#1A73E8', bg:'#E8F0FE' },
-      ieee:    { source:'IEEE',           color:'#00629B', bg:'#E1EEF6' },
-      acm:     { source:'ACM',            color:'#0F6FB5', bg:'#E3F0F8' },
-      news:    { source:'学术新闻',        color:'#7C4DD9', bg:'#F0EAFB' },
-    };
-    const mk = (id, s, o) => Object.assign({ id }, SRC[s], { sourceColor: SRC[s].color, sourceBg: SRC[s].bg }, o);
-    const arr = [
-      mk('p1','arxiv',{ topic:'C2Rust', ago:'2 小时前', venue:'arXiv:2506.14021',
-        title:'C2SafeRust: Idiomatic and Memory-Safe C-to-Rust Translation with LLM-Guided Refinement',
-        authors:'W. Zhang, A. Kumar, S. Li, et al.',
-        abstract:'We present a translation pipeline that pairs static ownership inference with iterative LLM refinement to emit idiomatic, compilable Rust from legacy C. On a 1.2M-LOC benchmark the system reduces residual unsafe blocks by 63% over prior transpilers while preserving runtime behavior.',
-        tldr:'用「静态所有权推断 + LLM 多轮修正」把 C 翻译成地道且能编译的 Rust，unsafe 代码块比已有工具少 63%。',
-        method:'先用静态分析推断指针的所有权与生命周期，生成初版 Rust；再让 LLM 在编译器反馈下迭代修正类型与借用错误，直到通过 borrow checker。',
-        contributions:['提出所有权感知的中间表示，显著降低 unsafe 使用','构建 1.2M 行规模的 C2Rust 评测集','开源可复现的迭代修正流水线'],
-        related:[{title:'Type-Directed Migration of C Pointers to Rust References',meta:'arXiv · 2026'},{title:'Bringing Rust to Safety-Critical Systems',meta:'IEEE S&P · 2025'}] }),
-      mk('p2','scholar',{ topic:'代码翻译', ago:'5 小时前', venue:'ACM Computing Surveys',
-        title:'Neural Code Translation at Scale: A Survey of Transpilation Techniques 2020–2026',
-        authors:'M. Rossi, J. Park',
-        abstract:'This survey organizes six years of neural transpilation research into a taxonomy spanning token-level, AST-level, and execution-guided approaches, and identifies fidelity benchmarking as the field\u2019s central open problem.',
-        tldr:'系统梳理 2020–2026 神经代码翻译，提出 token/AST/执行引导三层分类，并指出「翻译保真度评测」是核心未解难题。',
-        method:'对 180+ 篇文献做结构化编码，按表示层级与监督信号归类，并横向对比公开基准上的可编译率与语义一致率。',
-        contributions:['给出统一的神经转译技术分类法','汇总并对齐 12 个公开评测基准','提出保真度评测的标准化协议建议'],
-        related:[{title:'Benchmarking LLMs on Cross-Language Code Translation Fidelity',meta:'arXiv · 2026'}] }),
-      mk('p3','ieee',{ topic:'Skill', ago:'昨天', venue:'IEEE TSE',
-        title:'Repair Skills: Retrieval-Augmented Program Synthesis for Automated Vulnerability Repair',
-        authors:'H. Tanaka, R. Mehta, et al.',
-        abstract:'We frame vulnerability repair as composing reusable repair skills retrieved from a curated CWE-indexed corpus, achieving a 41% higher correct-patch rate than end-to-end synthesis on the VulnBench-2026 suite.',
-        tldr:'把漏洞修复建模为「检索可复用修复技能再组合」，在 VulnBench-2026 上正确补丁率比端到端合成高 41%。',
-        method:'按 CWE 类别建立修复技能库，遇到漏洞先检索相似技能模板，再由合成器在上下文中实例化补丁并经测试验证。',
-        contributions:['提出 CWE 索引的可复用修复技能库','检索增强的补丁合成框架','在多语言漏洞集上验证泛化能力'],
-        related:[{title:'SkillWeaver: Composing Reusable Agent Skills',meta:'ACM · 2026'}] }),
-      mk('p4','acm',{ topic:'Skill', ago:'昨天', venue:'FSE 2026',
-        title:'SkillWeaver: Composing Reusable Agent Skills for Software Engineering Tasks',
-        authors:'D. Okafor, L. Chen',
-        abstract:'SkillWeaver lets a coding agent discover, store, and recombine verified skills across tasks. Cross-task skill reuse cuts token cost by 2.7\u00d7 and improves task success on SWE-bench-Live by 14 points.',
-        tldr:'让编码 Agent 把验证过的「技能」存下来跨任务复用，token 成本降到 1/2.7，SWE-bench-Live 成功率 +14 分。',
-        method:'Agent 完成子任务后将可复用步骤抽象为带前置条件的技能并入库，后续任务先检索技能再编排执行。',
-        contributions:['自动技能发现与抽象机制','带前置条件的技能编排器','在长程软件任务上验证成本与成功率收益'],
-        related:[{title:'Repair Skills: RAG for Vulnerability Repair',meta:'IEEE · 2026'}] }),
-      mk('p5','arxiv',{ topic:'C2Rust', ago:'2 天前', venue:'arXiv:2506.10882',
-        title:'Type-Directed Migration of C Pointers to Rust References',
-        authors:'S. Volkov, P. Nair',
-        abstract:'A type-directed analysis classifies C pointer usages into ownership, borrowing, and raw categories, enabling automatic insertion of Rust references and lifetimes for 78% of pointers without manual annotation.',
-        tldr:'用类型导向分析把 C 指针分为所有权/借用/裸指针三类，78% 的指针可自动转为带生命周期的 Rust 引用。',
-        method:'在数据流图上做指针用途分类，结合别名分析推断生命周期边界，再生成对应的引用与借用注解。',
-        contributions:['指针用途三分类的类型规则','自动生命周期推断算法','与编译器集成的迁移工具原型'],
-        related:[{title:'C2SafeRust: LLM-Guided Refinement',meta:'arXiv · 2026'}] }),
-      mk('p6','news',{ topic:'C2Rust', ago:'2 天前', venue:'DARPA Newsroom',
-        title:'DARPA TRACTOR Program Reports First Milestone in Automated C-to-Rust Conversion',
-        authors:'DARPA I2O',
-        abstract:'The TRACTOR program announced that participating teams converted a 50K-LOC networking stack to memory-safe Rust with zero manual unsafe blocks, signalling growing maturity of automated legacy migration.',
-        tldr:'DARPA TRACTOR 项目公布首个里程碑：参赛团队把 5 万行网络栈零 unsafe 地自动迁移为安全 Rust。',
-        method:'（新闻）报道了项目阶段评测设置与团队成绩，未涉及具体算法细节。',
-        contributions:['自动迁移在真实系统软件上的可行性证据','为后续学界基准提供工业级目标','推动 C2Rust 评测标准化'],
-        related:[{title:'Type-Directed Migration of C Pointers',meta:'arXiv · 2026'}] }),
-      mk('p7','arxiv',{ topic:'代码翻译', ago:'3 天前', venue:'arXiv:2506.09140',
-        title:'Benchmarking LLMs on Cross-Language Code Translation Fidelity',
-        authors:'A. Gupta, Y. Sun, et al.',
-        abstract:'We release FidelityX, a benchmark measuring semantic equivalence of LLM code translations via differential testing across 9 language pairs, revealing that high compile rates often mask subtle behavioral divergence.',
-        tldr:'发布 FidelityX 基准，用差分测试衡量 9 个语言对的翻译语义一致性，发现「能编译」常掩盖细微行为偏差。',
-        method:'对每个翻译样本自动生成测试输入，跨源/目标语言做差分执行，统计行为分歧率作为保真度指标。',
-        contributions:['9 语言对的保真度评测基准','差分测试驱动的语义一致性度量','揭示编译率与正确性的脱节现象'],
-        related:[{title:'Neural Code Translation at Scale: A Survey',meta:'ACM Surveys · 2026'}] }),
-    ];
-    // 是否今日新发（否则为「最新回填」）、是否已读
-    const meta = {
-      p1: { today:true,  read:true  },
-      p2: { today:true,  read:false },
-      p3: { today:false, read:false },
-      p4: { today:false, read:true  },
-      p5: { today:false, read:true  },
-      p6: { today:false, read:false },
-      p7: { today:false, read:false },
-    };
-    // 原型说明：示例数据没有真实 URL，故「访问原文」指向各来源以标题构造的检索页，
-    // 保证落在相关结果上而非某个无关的真实编号。真实产品由后端抓取时回填真实链接。
-    const searchUrl = (src, title) => {
-      const q = encodeURIComponent(title);
-      switch (src) {
-        case 'arXiv':           return 'https://arxiv.org/search/?searchtype=all&query=' + q;
-        case 'Google Scholar':  return 'https://scholar.google.com/scholar?q=' + q;
-        case 'IEEE':            return 'https://ieeexplore.ieee.org/search/searchresult.jsp?queryText=' + q;
-        case 'ACM':             return 'https://dl.acm.org/action/doSearch?AllField=' + q;
-        default:                return 'https://www.google.com/search?q=' + q;
-      }
-    };
-    return arr.map(p => ({ ...p, ...meta[p.id], url: searchUrl(p.source, p.title), isBackfill: !meta[p.id].today }));
-  }
+    return [];
 
   navStyle(name, active) {
     const base = 'display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .12s;';
@@ -872,7 +783,7 @@ class Component extends DCLogic {
 
     // feed topic tabs — dynamic from data when remote
     const topicKeys = R ? Array.from(new Set(all.map(p => p.topic).filter(Boolean)))
-                        : ['代码翻译','C2Rust','Skill'];
+                        : [];
     const tabDefs = [{ key:'all', label:'全部' }, ...topicKeys.map(k => ({ key:k, label:k }))];
     const tabStyle = (active) => 'border:1px solid ' + (active?'#16181D':'#E4E8ED') + ';background:' + (active?'#16181D':'#fff') + ';color:' + (active?'#fff':'#5B6470') + ';border-radius:9px;padding:7px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;';
     const topicTabs = tabDefs.map(t => ({
@@ -934,23 +845,10 @@ class Component extends DCLogic {
     const toggleIgnored = () => this.setState({ showIgnored: !S.showIgnored });
 
     // trends
-    const trendRaw = [
-      { name:'漏洞修复', en:'Vulnerability Repair', delta:52, growth:48, color:'#2A5BD7' },
-      { name:'C2Rust', en:'C-to-Rust Translation', delta:34, growth:39, color:'#2A5BD7' },
-      { name:'代码翻译', en:'Code Translation', delta:28, growth:22, color:'#2A5BD7' },
-      { name:'Agent 技能', en:'Agent Skills', delta:19, growth:31, color:'#9AAAC9' },
-      { name:'形式化验证', en:'Formal Verification', delta:12, growth:9, color:'#9AAAC9' },
-      { name:'高斯泼溅', en:'Gaussian Splatting', delta:9, growth:5, color:'#9AAAC9' },
-    ];
+    // trends — populated from API; empty fallback
+    const trendRaw = [];
     const styleBars = (rows) => { const m = Math.max(1, ...rows.map(r => r.delta)); return rows.map((r,i) => ({ ...r, en: r.en || '', pct: Math.round(r.delta/m*100) + '%', color: i<3 ? '#2A5BD7' : '#9AAAC9' })); };
-    const demoTop3 = trendRaw.slice(0,3).map((t,i) => ({
-      rank:i+1, name:t.name, en:t.en, delta:t.delta, growth:t.growth,
-      summary: [
-        '安全合规驱动下持续升温，RAG 与技能复用成为主流路线，重点解决补丁正确性评测。',
-        '受 DARPA TRACTOR 等项目推动，自动迁移在真实系统软件上逼近零 unsafe，类型推断是关键。',
-        '从 token 级转向执行引导，研究焦点从「能编译」转向「行为一致」的保真度评测。',
-      ][i],
-    }));
+    const demoTop3 = [];
     const trendBars = (R && R.trendBars && R.trendBars.length) ? styleBars(R.trendBars) : styleBars(trendRaw);
     const decorateTrend = (h, i) => ({ ...h, en: h.en || '', rank: h.rank || i + 1,
       papers: h.papers || [], onClick: () => this.setState({ trendSel: h }) });
@@ -969,35 +867,23 @@ class Component extends DCLogic {
 
     // report
     const SEC_COLORS = ['#2A5BD7','#1F8A5B','#7C4DD9'];
-    const demoPicks = [all[0], all[2], all[3]].filter(Boolean).map((p,i) => ({
-      ...p, open:open(p.id), no:i+1,
-      why: ['本周引用增速最快的 C2Rust 工作，unsafe 削减幅度刷新纪录。','把漏洞修复重构为技能检索，正确率显著领先端到端方案。','技能复用让 Agent 成本降到 1/2.7，对长程任务意义重大。'][i],
-    }));
-    const demoSections = [
-      { name:'C2Rust', color:'#2A5BD7', count:34, text:'本周延续高热度：类型导向的指针迁移与 LLM 迭代修正两条路线并进，工业级真实系统（网络栈、内核模块）开始成为评测目标，零 unsafe 迁移不再是个例。' },
-      { name:'代码翻译', color:'#1F8A5B', count:28, text:'综述与基准类工作集中出现，社区共识正从「可编译率」转向「语义保真度」，差分测试成为衡量翻译质量的新标准。' },
-      { name:'Skill', color:'#7C4DD9', count:19, text:'可复用技能成为 Agent 与自动修复的共同关键词：把验证过的步骤沉淀为带前置条件的技能库，可同时带来成本下降与成功率提升。' },
-    ];
+    const demoPicks = [];
+    const demoSections = [];
     const reportPicks = (R && R.report && R.report.picks) ? R.report.picks.map((p,i) => ({ ...p, ...colorize(p), open:open(p.id), no:i+1 })) : demoPicks;
     const reportSections = (R && R.report && R.report.sections) ? R.report.sections.map((s,i) => ({ ...s, color: SEC_COLORS[i%3] })) : demoSections;
 
     // library
     const libBase = (R && R.library) ? R.library.map(p => ({ ...p, ...colorize(p), open:open(p.id) }))
-      : [all[0], all[3], all[4], all[2]].filter(Boolean).map(p => ({
-          ...p, open:open(p.id),
-          note: { p1:'与我们组的 IR 设计思路接近，重点看 §4 的所有权推断，可对比引用。', p4:'技能库的前置条件建模值得借鉴到我们的 pipeline。', p5:'', p3:'' }[p.id] || '',
-        }));
+      : [];
     const libCounts = {
       all: libBase.length,
       read: libBase.filter(p => p.read).length,
       noted: libBase.filter(p => p.note).length,
-      C2Rust: libBase.filter(p => p.topic==='C2Rust').length,
     };
     const libFilterDefs = [
       { key:'all', label:'全部' },
       { key:'read', label:'已读' },
       { key:'noted', label:'有笔记' },
-      { key:'C2Rust', label:'# C2Rust' },
     ];
     const libFilterStyle = (active) => 'font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 13px;cursor:pointer;' + (active
       ? 'color:#fff;background:#16181D;'
@@ -1010,7 +896,6 @@ class Component extends DCLogic {
     const library = libBase.filter(matchQ).filter(p => {
       if (S.libFilter==='read') return p.read;
       if (S.libFilter==='noted') return !!p.note;
-      if (S.libFilter==='C2Rust') return p.topic==='C2Rust';
       return true;
     });
 
